@@ -1,12 +1,30 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f4f4f9;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
 .App {
-  font-family: sans-serif;
-  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
   padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
   color: #4CAF50;
   margin-bottom: 20px;
+  font-size: 24px;
+  border-bottom: 2px solid #4CAF50;
+  padding-bottom: 10px;
 }
 
 ul {
@@ -15,15 +33,20 @@ ul {
 }
 
 li {
-  padding: 10px;
+  padding: 15px;
   border: 1px solid #ddd;
-  margin: 5px;
+  margin: 5px 0;
   background-color: #f9f9f9;
-  transition: background-color 0.3s;
+  border-radius: 4px;
+  transition: background-color 0.3s, transform 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 li:hover {
   background-color: #e2f7e2;
+  transform: scale(1.02);
 }
 
 input {
@@ -31,7 +54,15 @@ input {
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
-  width: 200px;
+  width: calc(100% - 22px);
+  max-width: 400px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.3s;
+}
+
+input:focus {
+  border-color: #4CAF50;
+  outline: none;
 }
 
 button {
@@ -41,9 +72,28 @@ button {
   background-color: #4CAF50;
   color: white;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.3s, transform 0.2s;
 }
 
 button:hover {
   background-color: #45a049;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .App {
+      padding: 10px;
+  }
+
+  h2 {
+      font-size: 20px;
+  }
+
+  input {
+      width: calc(100% - 16px);
+  }
+
+  button {
+      width: 100%;
+  }
 }
