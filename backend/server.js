@@ -127,7 +127,26 @@ app.patch('/tasks/:id', async (req, res) => {
 });
 
 // PUT: VOllständige Aktualisierung eines Teams
+app.put('/teams/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, members } = req.body;
 
+    try {
+        const result = await pool.query(
+            'UPDATE teams SET name = $1, members = $2 WHERE id = $3 RETURNING *',
+            [name, members, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
