@@ -209,7 +209,7 @@ app.delete('/teams/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const result = await pool.query(
-            'DELETE FROOM teams WHERE id = $1 RETURNING *',
+            'DELETE FROM teams WHERE id = $1 RETURNING *',
             [id]
         );
 
