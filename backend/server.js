@@ -89,5 +89,45 @@ app.put('/tasks/:id', async (req, res) => {
     }
 });
 
+// PATCH: Teilweise Aktualisierung einer Aufgabe
+app.patch('/tasks/:id', async (req, res) => {
+    const { id } = req.params;
+    const { title, status } = req.body;
+
+    const updates = [];
+    const values = [];
+
+    if (title) {
+        updates.push(`title = $${updates.length + 1}`);
+        values.push(title);
+    }
+
+    if (status) {
+        updates.push(`status = $${updates.length + 1}`);
+        values.push(status);
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const query = `UPDATE tasks SET ${updates.join(', ')} WHERE id = $${updates.length +1} RETURNING *`;
+    values.push(id);
+
+    try {
+        const result = await pool.query(query, values);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// PUT: VOllständige Aktualisierung eines Teams
+
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
