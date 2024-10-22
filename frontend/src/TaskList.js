@@ -1,6 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 
-const TaskList = ({ tasks }) => {
+const TaskList = () => {
+    const [tasks, setTasks] = useState([]);
+
+    useEffect(() => {
+        fetch('http://localhost:5000/tasks')
+        .then(response => response.json())
+        .then(data => setTasks(data));
+    }, []);
+
     return (
         <div>
             <h2>Tasks</h2>
