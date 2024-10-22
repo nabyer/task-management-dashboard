@@ -148,5 +148,41 @@ app.put('/teams/:id', async (req, res) => {
     }
 });
 
+// PATCH: Teilweise Akutalisierung eines Teams
+app.patch('/teams/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, members } = req.body;
+
+    const updates = [];
+    const values = [];
+
+    if (name) {
+        updates.push(`name = $${updates.length + 1}`);
+        values.push(name);
+    }
+    if (members) {
+        updates.push(`members = $${updates.length + 1}`);
+        values.push(members);
+    }
+
+    if (updates.length === 0) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const query = `UPDATE teams SET ${updates.join(', ')} WHERE id = $${updates.length + 1} RETURNING *`;
+    values.push(id);
+
+    try {
+        const result = await pool.query(query, values);
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
