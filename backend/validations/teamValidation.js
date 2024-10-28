@@ -5,4 +5,9 @@ const teamSchema = Joi.object({
     members: Joi.array().items(Joi.number().integer().min(1)).required(),
 });
 
-module.exports = teamSchema;
+const partialTeamSchema = Joi.object({
+    name: Joi.string().min(3).max(30),
+    members: Joi.array().items(Joi.number().integer().min(1)),
+});
+
+module.exports = { teamSchema, partialTeamSchema };

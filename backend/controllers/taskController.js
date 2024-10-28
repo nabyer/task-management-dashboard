@@ -108,5 +108,5 @@ module.exports = {
     createTask,
     updateTask,
     partialUpdateTask,
-    deleteTask,
+    deleteTask
 };

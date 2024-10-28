@@ -1,5 +1,5 @@
 const pool = require('../db/pool');
-const teamSchema = require('../validations/teamValidation');
+const { teamSchema, partialTeamSchema } = require('../validations/teamValidation');
 
 // GET: Alle Teams abrufen
 const getTeams = async (req, res) => {
@@ -58,6 +58,33 @@ const updateTeam = async (req, res) => {
     }
 };
 
+// PATCH: Team teilweise akutalisieren
+const partailUpdateTeam = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const { error } = partialTeamSchema.validate(updates);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE teams SET name = COALESCE($1, name), members = COALESCE($2, members) WHERE id = $3 RETURNING *',
+            [updates.name, updates.members, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error')
+    }
+};
+
 // DELETE: Team löschen
 const deleteTeam = async (req, res) => {
     const { id } = req.params;
@@ -77,5 +104,6 @@ module.exports = {
     getTeams,
     createTeam,
     updateTeam,
+    partailUpdateTeam,
     deleteTeam
 };
