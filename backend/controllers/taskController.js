@@ -7,14 +7,13 @@ const getTasks = async (req, res) => {
         const result = await pool.query('SELECT * FROM tasks');
         res.json(result.rows);
     } catch (err) {
-        console.error(err.message);
+        console.error(`Error in getTasks: ${err.message}`);
         res.status(500).send('Server Error');
     }
 };
 
 // POST: Neue Aufgabe hinzufügen
 const createTask = async (req, res) => {
-    // Validiere die Eingabedaten
     const { error } = taskSchema.validate(req.body);
     if (error) {
         return res.status(400).json({ error: error.details[0].message });
@@ -26,9 +25,9 @@ const createTask = async (req, res) => {
             'INSERT INTO tasks (title, status) VALUES ($1, $2) RETURNING *',
             [title, status]
         );
-        res.json(result.rows[0]);
+        res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error(err.message);
+        console.error(`Error in createTask: ${err.message}`);
         res.status(500).send('Server Error');
     }
 };
@@ -36,8 +35,11 @@ const createTask = async (req, res) => {
 // PUT: Aufgabe vollständig aktualisieren
 const updateTask = async (req, res) => {
     const { id } = req.params;
-    
-    // Validierung der Eingabedaten
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+    }
+
     const { error } = taskSchema.validate(req.body);
     if (error) {
         return res.status(400).json({ error: error.details[0].message });
@@ -55,7 +57,7 @@ const updateTask = async (req, res) => {
         }
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err.message);
+        console.error(`Error in updateTask: ${err.message}`);
         res.status(500).send('Server Error');
     }
 };
@@ -63,9 +65,13 @@ const updateTask = async (req, res) => {
 // PATCH: Aufgabe teilweise aktualisieren
 const partialUpdateTask = async (req, res) => {
     const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+    }
+
     const updates = req.body;
 
-    // Validierung der Eingabedaten für die PATCH-Anfrage
     const { error } = partialTaskSchema.validate(updates);
     if (error) {
         return res.status(400).json({ error: error.details[0].message });
@@ -83,7 +89,7 @@ const partialUpdateTask = async (req, res) => {
 
         res.json(result.rows[0]);
     } catch (err) {
-        console.error(err.message);
+        console.error(`Error in partialUpdateTask: ${err.message}`);
         res.status(500).send('Server Error');
     }
 };
@@ -91,14 +97,19 @@ const partialUpdateTask = async (req, res) => {
 // DELETE: Aufgabe löschen
 const deleteTask = async (req, res) => {
     const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID is required' });
+    }
+
     try {
         const result = await pool.query('DELETE FROM tasks WHERE id = $1 RETURNING *', [id]);
         if (result.rowCount === 0) {
             return res.status(404).json({ error: 'Task not found' });
         }
-        res.json(result.rows[0]);
+        res.status(200).json({ message: 'Task deleted successfully', id: parseInt(id, 10) });
     } catch (err) {
-        console.error(err.message);
+        console.error(`Error in deleteTask: ${err.message}`);
         res.status(500).send('Server Error');
     }
 };

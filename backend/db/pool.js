@@ -9,4 +9,10 @@ const pool = new Pool({
     port: process.env.PGPORT,
 });
 
-module.exports = pool;
+// Füge eine Methode zum Schließen der Verbindung hinzu
+const dbConnection = {
+    query: (text, params) => pool.query(text, params),
+    close: () => pool.end(), // Schließt die Datenbankverbindung
+};
+
+module.exports = dbConnection;
