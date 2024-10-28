@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const taskSchema = require('../validations/taskValidation');
 
 // GET: Alle Aufgaben abrufen
 const getTasks = async (req, res) => {
@@ -13,6 +14,12 @@ const getTasks = async (req, res) => {
 
 // POST: Neue Aufgabe hinzufügen
 const createTask = async (req, res) => {
+    // Validiere die Eingabedaten
+    const { error } = taskSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
     const { title, status } = req.body;
     try {
         const result = await pool.query(
@@ -29,6 +36,13 @@ const createTask = async (req, res) => {
 // PUT: Aufgabe vollständig aktualisieren
 const updateTask = async (req, res) => {
     const { id } = req.params;
+    
+    // Validierung der Eingabedaten
+    const { error } = taskSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
     const { title, status } = req.body;
 
     try {

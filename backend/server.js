@@ -11,7 +11,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/tasks', taskRoutes);
-app.use(':/teams', teamRoutes);
+app.use('/teams', teamRoutes);
 
 // Error-Handling-Middleware
 app.use(errorHandler);

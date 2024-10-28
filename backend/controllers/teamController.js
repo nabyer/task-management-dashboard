@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const teamSchema = require('../validations/teamValidation');
 
 // GET: Alle Teams abrufen
 const getTeams = async (req, res) => {
@@ -13,7 +14,13 @@ const getTeams = async (req, res) => {
 
 // POST: Neues Team hinzufügen
 const createTeam = async (req, res) => {
-    const { name, members } = req.body;
+    // Validiere die Eingabedaten
+    const { error } = teamSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    const { name, members } = req.body; // members ist nun ein Array
     try {
         const result = await pool.query(
             'INSERT INTO teams (name, members) VALUES ($1, $2) RETURNING *',
@@ -30,6 +37,11 @@ const createTeam = async (req, res) => {
 const updateTeam = async (req, res) => {
     const { id } = req.params;
     const { name, members } = req.body;
+
+    const { error } = teamSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
 
     try {
         const result = await pool.query(
