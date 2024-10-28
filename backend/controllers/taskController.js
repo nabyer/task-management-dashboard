@@ -1,5 +1,5 @@
 const pool = require('../db/pool');
-const taskSchema = require('../validations/taskValidation');
+const { taskSchema, partialTaskSchema } = require('../validations/taskValidation');
 
 // GET: Alle Aufgaben abrufen
 const getTasks = async (req, res) => {
@@ -60,6 +60,34 @@ const updateTask = async (req, res) => {
     }
 };
 
+// PATCH: Aufgabe teilweise aktualisieren
+const partialUpdateTask = async (req, res) => {
+    const { id } = req.params;
+    const updates = req.body;
+
+    // Validierung der Eingabedaten für die PATCH-Anfrage
+    const { error } = partialTaskSchema.validate(updates);
+    if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+    }
+
+    try {
+        const result = await pool.query(
+            'UPDATE tasks SET title = COALESCE($1, title), status = COALESCE($2, status) WHERE id = $3 RETURNING *',
+            [updates.title, updates.status, id]
+        );
+
+        if (result.rowCount === 0) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+};
+
 // DELETE: Aufgabe löschen
 const deleteTask = async (req, res) => {
     const { id } = req.params;
@@ -79,5 +107,6 @@ module.exports = {
     getTasks,
     createTask,
     updateTask,
-    deleteTask
+    partialUpdateTask,
+    deleteTask,
 };
