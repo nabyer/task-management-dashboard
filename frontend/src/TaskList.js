@@ -8,6 +8,8 @@ const TaskList = () => {
     const [editTaskTitle, setEditTaskTitle] = useState('');
     const [editTaskStatus, setEditTaskStatus] = useState('');
 
+    const statusOptions = ['pending', 'in progress', 'completed'];
+
     useEffect(() => {
         fetch('http://localhost:5000/tasks')
             .then(response => response.json())
@@ -16,6 +18,10 @@ const TaskList = () => {
     }, []);
 
     const handleAddTask = () => {
+        if (!newTask || !newStatus) {
+            alert('Bitte fülle alle Felder aus.');
+            return;
+        }
         const taskData = {
             title: newTask,
             status: newStatus,
@@ -28,7 +34,12 @@ const TaskList = () => {
             },
             body: JSON.stringify(taskData),
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Fehler: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 setTasks([...tasks, data]);
                 setNewTask('');
@@ -51,7 +62,12 @@ const TaskList = () => {
             },
             body: JSON.stringify({ title: editTaskTitle, status: editTaskStatus }),
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Fehler: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
                 const updatedTasks = tasks.map(task =>
                     task.id === editTaskId ? data : task
@@ -97,12 +113,12 @@ const TaskList = () => {
                 value={newTask}
                 onChange={e => setNewTask(e.target.value)}
             />
-            <input
-                type="text"
-                placeholder="Status"
-                value={newStatus}
-                onChange={e => setNewStatus(e.target.value)}
-            />
+            <select value={newStatus} onChange={e => setNewStatus(e.target.value)}>
+                <option value="">Select Status</option>
+                {statusOptions.map(status => (
+                    <option key={status} value={status}>{status}</option>
+                ))}
+            </select>
             <button onClick={handleAddTask}>Add Task</button>
             {editTaskId && (
                 <div>
@@ -113,12 +129,11 @@ const TaskList = () => {
                         value={editTaskTitle}
                         onChange={e => setEditTaskTitle(e.target.value)}
                     />
-                    <input
-                        type="text"
-                        placeholder="Status"
-                        value={editTaskStatus}
-                        onChange={e => setEditTaskStatus(e.target.value)}
-                    />
+                    <select value={editTaskStatus} onChange={e => setEditTaskStatus(e.target.value)}>
+                        {statusOptions.map(status => (
+                            <option key={status} value={status}>{status}</option>
+                        ))}
+                    </select>
                     <button onClick={handleUpdateTask}>Update Task</button>
                 </div>
             )}

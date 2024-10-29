@@ -16,6 +16,10 @@ const TeamList = () => {
     }, []);
 
     const handleAddTeam = () => {
+        if (!newTeam || !newMembers) {
+            alert('Bitte fülle alle Felder aus.');
+            return;
+        }
         const teamData = {
             name: newTeam,
             members: newMembers.split(',').map(member => member.trim()),
@@ -104,7 +108,7 @@ const TeamList = () => {
             />
             <input
                 type="text"
-                placeholder="Members (comma separated)"
+                placeholder="Members (e.g. Alice, Bob...)"
                 value={newMembers}
                 onChange={e => setNewMembers(e.target.value)}
             />
